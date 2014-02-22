@@ -47,6 +47,7 @@ phaseSpace::phaseSpaceDriver::phaseSpaceDriver(
   : is_new_(false), n_uid_(n_uid)
 {
   udp_server_=new udpServer(hostname, port);
+  poses_.resize(n_uid_);
 
   run();
 }
@@ -59,23 +60,21 @@ phaseSpace::phaseSpaceDriver::~phaseSpaceDriver()
 
 void phaseSpace::phaseSpaceDriver::run()
 {
-  boost::thread udp_thread;
-
-  udp_thread=boost::thread(boost::bind(&phaseSpace::phaseSpaceDriver::threadRun, this));
-  //udp_thread.join();
+  udp_thread_= new boost::thread(&phaseSpace::phaseSpaceDriver::threadRun, this);
 }
 
 int phaseSpace::phaseSpaceDriver::read_packet()
 {
-  mutex_.lock();
+
 
   phaseSpace::AtlasSimMsg pck[4];
 
   int nbyte;
-  //nbyte=udp_server_->recv_udp(pck, sizeof(pck));
+  nbyte=udp_server_->recv_udp(pck, sizeof(pck));
+  ROS_INFO("%d byte received", nbyte);
 
+  mutex_.lock();
   //TODO: update poses_ here
-
   mutex_.unlock();
 
   return nbyte;
@@ -85,9 +84,18 @@ void phaseSpace::phaseSpaceDriver::threadRun()
 
   while(true) {
 	read_packet();
-    printf(".");
-	boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+    try
+    {
+      boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    }
+    catch(boost::thread_interrupted&)
+    {
+      std::cout << "Thread is stopped" << std::endl;
+      return;
+    }
   }
+  udp_thread_->join();
+  delete udp_thread_;
 }
 
 void phaseSpace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)

@@ -68,6 +68,8 @@ private:
   std::vector<tf::Pose> poses_;
   bool is_new_;
   boost::mutex mutex_;
+
+  boost::thread* udp_thread_;
 };
 
 }

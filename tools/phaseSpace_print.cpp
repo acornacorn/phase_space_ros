@@ -76,16 +76,20 @@ int kbhit ( void ) {
 
 int main( int argc, char** argv )
 {
-  printf("starting phasespace print\n");
+  ROS_INFO("starting phasespace print");
   phaseSpaceDriver phasespace("phasespace-pc", 5062, 2);
-  printf("phasespace inited\n");
+  ROS_INFO("phasespace inited");
   std::vector<tf::Pose> poses;
 
 
   while (!kbhit()) {
-	//  phasespace.read_phasespace(poses);
-    printf("*");
-	  usleep( 100000 );
+	phasespace.read_phasespace(poses);
+	ROS_INFO("pose0 x: %6.3f  y: %6.3f  z: %6.3f ",
+			poses[0].getOrigin().getX(),
+			poses[0].getOrigin().getY(),
+			poses[0].getOrigin().getZ());
+
+    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
   }
 
 

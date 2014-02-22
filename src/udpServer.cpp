@@ -83,6 +83,7 @@ void phaseSpace::udpServer::bind_udp(
   struct sockaddr_in sa;  
 
   fd_ = socket(AF_INET, SOCK_DGRAM , 0);
+
   if (fd_ < 0)
   {
     int save_errno = errno;
@@ -90,18 +91,22 @@ void phaseSpace::udpServer::bind_udp(
                             << boost::errinfo_errno(save_errno));
   }
 
+  printf("socket created %d for %s \n", fd_, hostname.c_str());
+
   memset(&sa, 0, sizeof(sa));
   sa.sin_family = AF_INET;
-  sa.sin_addr.s_addr = hostname.c_str() ? inet_addr(hostname.c_str()) : htonl(INADDR_ANY);
+  //sa.sin_addr.s_addr = hostname.c_str() ? inet_addr(hostname.c_str()) : htonl(INADDR_ANY);
+  sa.sin_addr.s_addr = htonl(INADDR_ANY);
   sa.sin_port = htons((u_short)port);
 
-  if (bind(fd_, (struct sockaddr *) &sa,  sizeof(sa))<0)
+  int rv;
+  if (rv=bind(fd_, (struct sockaddr *) &sa,  sizeof(sa))<0)
   {
     int save_errno = errno;
     BOOST_THROW_EXCEPTION(bind_failed_exception()
                             << boost::errinfo_errno(save_errno));   
   }
-
+  printf("bind result: %d \n", rv);
 }
 
 void phaseSpace::udpServer::close()
