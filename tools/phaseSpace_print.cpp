@@ -39,7 +39,7 @@
 #include <ctime>
 #include <time.h>
 #include <unistd.h>
-#include "phaseSpace/phaseSpace.h"
+#include "phaseSpace/phaseSpaceDriver.h"
 
 using namespace phaseSpace;
 
@@ -72,10 +72,24 @@ int kbhit ( void ) {
 
     return result == 1;
 }
+
+
 int main( int argc, char** argv )
 {
-	PointATC3DG bird;
+  printf("starting phasespace print\n");
+  phaseSpaceDriver phasespace("phasespace-pc", 5062, 2);
+  printf("phasespace inited\n");
+  std::vector<tf::Pose> poses;
 
+
+  while (!kbhit()) {
+	//  phasespace.read_phasespace(poses);
+    printf("*");
+	  usleep( 100000 );
+  }
+
+
+	/*
 	if( !bird ) return -1;	
 
 	double dX, dY, dZ, dAzimuth, dElevation, dRoll;
@@ -109,7 +123,7 @@ int main( int argc, char** argv )
 
 	time_t tb=time(NULL);
 	printf("\n%i samples collected\n",rec_count);
-
+*/
 	return 0;
 }
 

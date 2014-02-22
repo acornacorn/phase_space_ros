@@ -47,7 +47,7 @@ phaseSpace::phaseSpaceDriver::phaseSpaceDriver(
   : is_new_(false), n_uid_(n_uid)
 {
   udp_server_=new udpServer(hostname, port);
-  
+
   run();
 }
 
@@ -61,8 +61,8 @@ void phaseSpace::phaseSpaceDriver::run()
 {
   boost::thread udp_thread;
 
-  udp_thread=boost::thread(&phaseSpace::phaseSpaceDriver::threadRun, this);
-  udp_thread.join();
+  udp_thread=boost::thread(boost::bind(&phaseSpace::phaseSpaceDriver::threadRun, this));
+  //udp_thread.join();
 }
 
 int phaseSpace::phaseSpaceDriver::read_packet()
@@ -70,7 +70,9 @@ int phaseSpace::phaseSpaceDriver::read_packet()
   mutex_.lock();
 
   phaseSpace::AtlasSimMsg pck[4];
-  int nbyte=udp_server_->recv_udp(pck, sizeof(pck));
+
+  int nbyte;
+  //nbyte=udp_server_->recv_udp(pck, sizeof(pck));
 
   //TODO: update poses_ here
 
@@ -80,10 +82,11 @@ int phaseSpace::phaseSpaceDriver::read_packet()
 }
 void phaseSpace::phaseSpaceDriver::threadRun()
 {
+
   while(true) {
 	read_packet();
-
-	boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+    printf(".");
+	boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
   }
 }
 

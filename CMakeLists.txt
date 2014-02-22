@@ -45,6 +45,15 @@ target_link_libraries(phasespace
   ${catkin_LIBRARIES}
 )
 
+add_executable(phaseSpace_print 
+  tools/phaseSpace_print.cpp)
+add_dependencies(phaseSpace_print 
+  phasespace)
+target_link_libraries(phaseSpace_print 
+  phasespace 
+  ${catkin_LIBRARIES}
+)
+
 
 
 
