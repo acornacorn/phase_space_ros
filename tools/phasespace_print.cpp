@@ -39,9 +39,10 @@
 #include <ctime>
 #include <time.h>
 #include <unistd.h>
-#include "phaseSpace/phaseSpaceDriver.h"
+#include "tf/tf.h"
+#include "phasespace/phaseSpaceDriver.h"
 
-using namespace phaseSpace;
+using namespace phasespace;
 
 struct termios oldterm, newterm;
 void set_unbuffered ( void ) {
@@ -84,11 +85,15 @@ int main( int argc, char** argv )
 
   while (!kbhit()) {
 	phasespace.read_phasespace(poses);
-	ROS_INFO("pose0 x: %6.3f  y: %6.3f  z: %6.3f ",
+	ROS_INFO("pose0 x: %4.1f  y: %4.1f  z: %4.1f ",
 			poses[0].getOrigin().getX(),
 			poses[0].getOrigin().getY(),
 			poses[0].getOrigin().getZ());
-
+	ROS_INFO("pose0 w: %3.2f  x: %3.2f  y: %3.2f  z: %3.2f ",
+			poses[0].getRotation().w(),
+			poses[0].getRotation().x(),
+			poses[0].getRotation().y(),
+			poses[0].getRotation().z());
     boost::this_thread::sleep(boost::posix_time::milliseconds(100));
   }
 

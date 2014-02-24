@@ -34,52 +34,57 @@
 
 /** \Author: Sean Seungkook Yun */
 
-#include "phaseSpace/phaseSpaceDriver.h"
+#include "phasespace/phaseSpaceDriver.h"
 
 namespace phaseSpace{
-#include "phaseSpace/msg.h"
+#include "phasespace/msg.h"
 }
 
-phaseSpace::phaseSpaceDriver::phaseSpaceDriver(
+phasespace::phaseSpaceDriver::phaseSpaceDriver(
                               const std::string hostname,
                               const int port,
                               const int n_uid)
   : is_new_(false), n_uid_(n_uid)
 {
   udp_server_=new udpServer(hostname, port);
-  poses_.resize(n_uid_);
+
+  // there's no default constructor of tf::Pose
+  // with (0,0,0) position and (1,0,0,0) quaternion. it's annoying...
+  for (int i=0; i<n_uid_; i++)
+	  poses_.push_back(tf::Pose(tf::Quaternion(0,0,0,1)));
 
   run();
 }
 
-phaseSpace::phaseSpaceDriver::~phaseSpaceDriver()
+phasespace::phaseSpaceDriver::~phaseSpaceDriver()
 {
   if (udp_server_)
     delete udp_server_;
 }
 
-void phaseSpace::phaseSpaceDriver::run()
+void phasespace::phaseSpaceDriver::run()
 {
-  udp_thread_= new boost::thread(&phaseSpace::phaseSpaceDriver::threadRun, this);
+  udp_thread_= new boost::thread(&phasespace::phaseSpaceDriver::threadRun, this);
 }
 
-int phaseSpace::phaseSpaceDriver::read_packet()
+int phasespace::phaseSpaceDriver::read_packet()
 {
-
-
   phaseSpace::AtlasSimMsg pck[4];
 
   int nbyte;
   nbyte=udp_server_->recv_udp(pck, sizeof(pck));
   ROS_INFO("%d byte received", nbyte);
 
-  mutex_.lock();
-  //TODO: update poses_ here
-  mutex_.unlock();
+  if (nbyte>0) {
+    mutex_.lock();
+    //update poses_ here
+
+    mutex_.unlock();
+  }
 
   return nbyte;
 }
-void phaseSpace::phaseSpaceDriver::threadRun()
+void phasespace::phaseSpaceDriver::threadRun()
 {
 
   while(true) {
@@ -98,7 +103,7 @@ void phaseSpace::phaseSpaceDriver::threadRun()
   delete udp_thread_;
 }
 
-void phaseSpace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
+void phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
 {
   mutex_.lock();
   poses=poses_;  //copy the whole structure due to synchronous comm

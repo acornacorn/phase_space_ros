@@ -42,7 +42,7 @@
 #include <string>
 #include <stddef.h>
 
-namespace phaseSpace
+namespace phasespace
 {
 
 class udpServer

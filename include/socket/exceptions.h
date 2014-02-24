@@ -39,7 +39,7 @@
 
 #include <boost/exception/exception.hpp>
 
-namespace phaseSpace
+namespace phasespace
 {
 
 struct base_exception: virtual boost::exception, virtual std::exception {};

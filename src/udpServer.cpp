@@ -50,13 +50,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-phaseSpace::udpServer::udpServer(const int port)
+phasespace::udpServer::udpServer(const int port)
   : fd_(-1)
 {
   bind_udp(NULL, port);
 } 
 
-phaseSpace::udpServer::udpServer(
+phasespace::udpServer::udpServer(
       const std::string& hostname,
       const int port)
   : fd_(-1)
@@ -65,18 +65,18 @@ phaseSpace::udpServer::udpServer(
 }
 
 // Do not copy
-phaseSpace::udpServer::udpServer(const udpServer& udp)
+phasespace::udpServer::udpServer(const udpServer& udp)
   : fd_(-1)
 {
   BOOST_THROW_EXCEPTION(base_exception());
 }
 
-phaseSpace::udpServer::~udpServer()
+phasespace::udpServer::~udpServer()
 {
   close();
 }
 
-void phaseSpace::udpServer::bind_udp(
+void phasespace::udpServer::bind_udp(
       const std::string& hostname,
       const int port)
 {
@@ -109,7 +109,7 @@ void phaseSpace::udpServer::bind_udp(
   printf("bind result: %d \n", rv);
 }
 
-void phaseSpace::udpServer::close()
+void phasespace::udpServer::close()
 {
   if (fd_ >= 0)
     ::close(fd_);
@@ -117,11 +117,11 @@ void phaseSpace::udpServer::close()
 
 }
 
-int phaseSpace::udpServer::recv_udp(void *buf, const int nbytes) {
+int phasespace::udpServer::recv_udp(void *buf, const int nbytes) {
   return recv_udp(buf, nbytes, 0, NULL, NULL);
 }
 
-int phaseSpace::udpServer::recv_udp(void *buf, const int nbytes, int flags, char ip[20], int *port) {
+int phasespace::udpServer::recv_udp(void *buf, const int nbytes, int flags, char ip[20], int *port) {
   int n, len;
   struct sockaddr_in sa;
 

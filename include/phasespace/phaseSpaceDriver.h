@@ -43,7 +43,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 
-namespace phaseSpace {
+namespace phasespace {
 
 class phaseSpaceDriver {
 public:

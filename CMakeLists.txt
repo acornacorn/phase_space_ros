@@ -13,7 +13,7 @@ find_package(PkgConfig)
 
 add_message_files(
   FILES
-  PhaseSpace.msg
+  PhaseSpaceMsg.msg
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -45,15 +45,47 @@ target_link_libraries(phasespace
   ${catkin_LIBRARIES}
 )
 
-add_executable(phaseSpace_print 
-  tools/phaseSpace_print.cpp)
-add_dependencies(phaseSpace_print 
+add_executable(phasespace_print 
+  tools/phasespace_print.cpp)
+add_dependencies(phasespace_print 
   phasespace)
-target_link_libraries(phaseSpace_print 
+target_link_libraries(phasespace_print 
   phasespace 
   ${catkin_LIBRARIES}
 )
 
+add_executable(phasespace_node 
+  nodes/phasespace_node.cpp)
+add_dependencies(phasespace_node 
+  phasespace)
+
+target_link_libraries(phasespace_node
+  phasespace
+  ${catkin_LIBRARIES}
+)
+
+
+
+install(TARGETS phasespace_print
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(TARGETS phasespace_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+
+install(TARGETS phasespace
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(DIRECTORY include/ DESTINATION include)
+
+install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 
 
