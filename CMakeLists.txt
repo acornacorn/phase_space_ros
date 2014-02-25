@@ -39,9 +39,11 @@ add_library(phasespace
   src/phaseSpaceDriver.cpp
   src/udpServer.cpp)
 add_dependencies(phasespace 
+  owlsock
   phasespace_gencpp)
 
 target_link_libraries(phasespace
+  owlsock
   ${catkin_LIBRARIES}
 )
 

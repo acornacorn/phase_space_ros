@@ -63,20 +63,22 @@ public:
 private:
   //do not copy
   phaseSpaceDriver(const phaseSpaceDriver&);
+
+  //read from the hardware
   void updateMarker(const int index, const float* pose);
   
 
 
   const int n_uid_;
-  //udpServer* udp_server_;
+
   std::vector<tf::Pose> poses_;
   const std::string hostname_;
   bool is_new_;
+  //markers are not used but still need to be read anyway
   OWLMarker markers_[MAX_MARKER];
+  //the uids. 0=left
   OWLRigid rigid_[MAX_MARKER];
-  //boost::mutex mutex_;
 
-  //boost::thread* udp_thread_;
 };
 
 }

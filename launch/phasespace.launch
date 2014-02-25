@@ -8,7 +8,6 @@
   <arg name="rz" default="0.0" />
   <arg name="use_grab_frame" default="true" />
   <arg name="phasespace_pc" default="phasespace-pc" />
-  <arg name="phasespace_port" default="5064" />
   <arg name="n_sensor" default="2" />
   
 
@@ -21,7 +20,6 @@
     <param name="attach_pitch" value="$(arg ry)" />
     <param name="attach_yaw" value="$(arg rz)" />
     <param name="phasespace_pc" value="$(arg phasespace_pc)" />
-    <param name="phasespace_port" value="$(arg phasespace_port)" />
     <param name="n_sensor" value="$(arg n_sensor)" />
   </node>
 

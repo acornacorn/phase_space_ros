@@ -40,6 +40,8 @@ namespace phaseSpace{
 #include "phasespace/msg.h"
 }
 
+#define SLAVE_CLIENT_MODE
+
 phasespace::phaseSpaceDriver::phaseSpaceDriver(
                               const std::string hostname,
                               const int n_uid)
@@ -60,7 +62,7 @@ phasespace::phaseSpaceDriver::~phaseSpaceDriver()
 int phasespace::phaseSpaceDriver::init()
 {
   int flags = 0;
-#define SLAVE_CLIENT_MODE
+
 #ifdef SLAVE_CLIENT_MODE
   flags |= OWL_SLAVE;
 #endif
@@ -128,9 +130,11 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
   // no data yet
   if(n == 0)
   {
+	is_new_=false;
 	return 0;
   }
 
+  is_new_=true;
   for(int j = 0; j < n; j++){
 	if(rigid_[j].cond > 0)
 	{
