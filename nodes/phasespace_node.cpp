@@ -52,17 +52,19 @@ int main(int argc, char **argv)
   ROS_INFO("Initializing PhaseSpace. Please wait....");
   std::string phasespace_hostname;
   n_private.param<std::string>("phasespace_pc", phasespace_hostname, "phasespace-pc");
-  int port;
-  n_private.param<int>("phasespace_port", port, 5064);
   int num_sen;
   n_private.param<int>("n_sensor", num_sen, 2);
-  phaseSpaceDriver phasespace(phasespace_hostname, port, num_sen);
-  ROS_INFO("Initialization Complete.");
-
   if (num_sen<2) {
 	ROS_ERROR("at least 2 trackers required");
 	return -1;
   }
+
+  phaseSpaceDriver phasespace(phasespace_hostname, num_sen);
+  if (phasespace.init()<0) {
+	  ROS_ERROR("PhaseSpace init failed. check the device?");
+	  return -1;
+  }
+  ROS_INFO("Initialization Complete.");
 
   ROS_INFO("Output is set: position/quaternion");
 

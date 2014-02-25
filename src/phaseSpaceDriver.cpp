@@ -42,72 +42,114 @@ namespace phaseSpace{
 
 phasespace::phaseSpaceDriver::phaseSpaceDriver(
                               const std::string hostname,
-                              const int port,
                               const int n_uid)
-  : is_new_(false), n_uid_(n_uid)
+  : hostname_(hostname), is_new_(false), n_uid_(n_uid)
 {
-  udp_server_=new udpServer(hostname, port);
-
   // there's no default constructor of tf::Pose
   // with (0,0,0) position and (1,0,0,0) quaternion. it's annoying...
   for (int i=0; i<n_uid_; i++)
 	  poses_.push_back(tf::Pose(tf::Quaternion(0,0,0,1)));
-
-  run();
 }
 
 phasespace::phaseSpaceDriver::~phaseSpaceDriver()
 {
-  if (udp_server_)
-    delete udp_server_;
+  // cleanup
+  owlDone();
 }
 
-void phasespace::phaseSpaceDriver::run()
+int phasespace::phaseSpaceDriver::init()
 {
-  udp_thread_= new boost::thread(&phasespace::phaseSpaceDriver::threadRun, this);
+  int flags = 0;
+#define SLAVE_CLIENT_MODE
+#ifdef SLAVE_CLIENT_MODE
+  flags |= OWL_SLAVE;
+#endif
+  if(owlInit(hostname_.c_str(), flags) < 0)
+    return -1;
+  owlSetInteger(OWL_FRAME_BUFFER_SIZE, 0);
+
+#ifndef SLAVE_CLIENT_MODE
+  // create tracker 0
+  tracker = 0;
+  owlTrackeri(tracker, OWL_CREATE, OWL_POINT_TRACKER);
+
+  // set markers
+  for(int i = 0; i < n_uid_; i++)
+    owlMarkeri(MARKER(tracker, i), OWL_SET_LED, i);
+
+  // activate tracker
+  owlTracker(tracker, OWL_ENABLE);
+  // flush requests and check for errors
+  if(!owlGetStatus())
+  {
+      owl_print_error("error in point tracker setup", owlGetError());
+      return -1;
+  }
+#endif
+
+  // set default frequency
+  owlSetFloat(OWL_FREQUENCY, OWL_MAX_FREQUENCY);
+
+  // start streaming
+  owlSetInteger(OWL_STREAMING, OWL_ENABLE);
+
+  return 0;
 }
 
-int phasespace::phaseSpaceDriver::read_packet()
+void phasespace::phaseSpaceDriver::updateMarker(const int index, const float* pose)
 {
-  phaseSpace::AtlasSimMsg pck[4];
+  if (index>n_uid_)
+	  return;
 
-  int nbyte;
-  nbyte=udp_server_->recv_udp(pck, sizeof(pck));
-  ROS_INFO("%d byte received", nbyte);
+  poses_[index].setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
+  poses_[index].setRotation(tf::Quaternion(pose[3],pose[4],pose[5],pose[6]));
+}
 
-  if (nbyte>0) {
-    mutex_.lock();
-    //update poses_ here
+int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
+{
+  int rc = 0;
+  int err;
 
-    mutex_.unlock();
+  // get the rigid body
+  int n = owlGetRigids(rigid_, MAX_MARKER);
+
+  // get the rigid body markers
+  //  note: markers have to be read,
+  //  even if they are not used
+  int m = owlGetMarkers(markers_, MAX_MARKER);
+
+  // check for error
+  if((err = owlGetError()) != OWL_NO_ERROR)
+  {
+	owl_print_error("error", err);
+	return -1;
   }
 
-  return nbyte;
-}
-void phasespace::phaseSpaceDriver::threadRun()
-{
-
-  while(true) {
-	read_packet();
-    try
-    {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(10));
-    }
-    catch(boost::thread_interrupted&)
-    {
-      std::cout << "Thread is stopped" << std::endl;
-      return;
-    }
+  // no data yet
+  if(n == 0)
+  {
+	return 0;
   }
-  udp_thread_->join();
-  delete udp_thread_;
-}
 
-void phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
-{
-  mutex_.lock();
-  poses=poses_;  //copy the whole structure due to synchronous comm
-  mutex_.unlock();
+  for(int j = 0; j < n; j++){
+	if(rigid_[j].cond > 0)
+	{
+      //if (seqId % freq == 0) printf("r(%d) %3.0f %d id=%d:\t", j, rigid[j].cond, rigid[j].flag, rigid[j].id);
+	}
+
+	const int id = rigid_[j].id - 1;
+	if (id < 0 || id > n_uid_)
+	{
+		printf("id error %d\n", id);
+		return -1;
+	}
+
+	//build pose here
+	updateMarker(j, rigid_[j].pose);
+  }
+
+  poses=poses_;
+  return 1;
 }
 
 

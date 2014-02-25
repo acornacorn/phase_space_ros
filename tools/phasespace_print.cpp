@@ -78,10 +78,14 @@ int kbhit ( void ) {
 int main( int argc, char** argv )
 {
   ROS_INFO("starting phasespace print");
-  phaseSpaceDriver phasespace("phasespace-pc", 5062, 2);
+  phaseSpaceDriver phasespace("phasespace-pc",2);
+  if (phasespace.init()<0) {
+	  ROS_ERROR("PhaseSpace init failed. check the device?");
+	  return -1;
+  }
   ROS_INFO("phasespace inited");
-  std::vector<tf::Pose> poses;
 
+  std::vector<tf::Pose> poses;
 
   while (!kbhit()) {
 	phasespace.read_phasespace(poses);
@@ -94,45 +98,9 @@ int main( int argc, char** argv )
 			poses[0].getRotation().x(),
 			poses[0].getRotation().y(),
 			poses[0].getRotation().z());
-    boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+    usleep(100000);
   }
 
-
-	/*
-	if( !bird ) return -1;	
-
-	double dX, dY, dZ, dAzimuth, dElevation, dRoll;
-	double* quat=new double[4];
-	
-	int numsen=bird.getNumberOfSensors();
-	printf( "nSensors: %d\n", numsen );
-
-	for (int i=0; i<numsen; i++) {
-		bird.setSuddenOutputChangeLock(i);
-		bird.setSensorQuaternion(i);
-	}
-
-	
-	printf( "    X       Y       Z	   Qw    Qx    Qy    Qz\n" );
-	int rec_count=0;	 
-	time_t ta=time(NULL);
-	while (!kbhit()) 
-	{	
-		rec_count++;
-	//	usleep( 100000 );
-		for( int i = 0; i <numsen  ; ++i ) 
-		{
-			bird.getCoordinatesQuaternion(i, dX, dY, dZ, quat);
-			if (i==0) printf( "%i %+6.1f  %+6.1f  %+6.1f  %+4.3f  %+4.3f  %+4.3f   %+4.3f\r",i,
-				dX, dY, dZ, quat[0], quat[1], quat[2], quat[3] );
-		}
-	}
-
-	delete [] quat;
-
-	time_t tb=time(NULL);
-	printf("\n%i samples collected\n",rec_count);
-*/
 	return 0;
 }
 

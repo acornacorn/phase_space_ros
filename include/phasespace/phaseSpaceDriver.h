@@ -37,39 +37,46 @@
 #ifndef _PHASESPACE__DRIVER_H_
 #define _PHASESPACE__DRIVER_H_
 
-#include "socket/udpServer.h"
+//#include "socket/udpServer.h"
+//#include <boost/thread/mutex.hpp>
+//#include <boost/thread/thread.hpp>
 #include <ros/ros.h>
 #include "tf/tf.h"
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/thread.hpp>
+
+#include "owl.h"
+#include "owl_math.h"
 
 namespace phasespace {
 
 class phaseSpaceDriver {
 public:
-  phaseSpaceDriver(const std::string hostname, const int port, const int n_uid);
+  phaseSpaceDriver(const std::string hostname, const int n_uid);
   ~phaseSpaceDriver();
 
-  //read the uid input.
-  void read_phasespace(std::vector<tf::Pose>&);
+  int init();
 
-  int read_packet();
+  //read the uid input.
+  int read_phasespace(std::vector<tf::Pose>&);
+
+  static const int MAX_MARKER=32;
 
 private:
   //do not copy
   phaseSpaceDriver(const phaseSpaceDriver&);
+  void updateMarker(const int index, const float* pose);
   
-  void run();
 
-  void threadRun();
 
   const int n_uid_;
-  udpServer* udp_server_;
+  //udpServer* udp_server_;
   std::vector<tf::Pose> poses_;
+  const std::string hostname_;
   bool is_new_;
-  boost::mutex mutex_;
+  OWLMarker markers_[MAX_MARKER];
+  OWLRigid rigid_[MAX_MARKER];
+  //boost::mutex mutex_;
 
-  boost::thread* udp_thread_;
+  //boost::thread* udp_thread_;
 };
 
 }
