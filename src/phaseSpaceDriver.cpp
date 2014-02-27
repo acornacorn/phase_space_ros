@@ -72,7 +72,7 @@ int phasespace::phaseSpaceDriver::init()
 
 #ifndef SLAVE_CLIENT_MODE
   // create tracker 0
-  tracker = 0;
+  int  tracker = 0;
   owlTrackeri(tracker, OWL_CREATE, OWL_POINT_TRACKER);
 
   // set markers
@@ -113,7 +113,7 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
   int err;
 
   // get the rigid body
-  int n = owlGetRigids(rigid_, MAX_MARKER);
+  int n = owlGetRigids(rigid_, n_uid_);
 
   // get the rigid body markers
   //  note: markers have to be read,
@@ -130,30 +130,30 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
   // no data yet
   if(n == 0)
   {
-	is_new_=false;
 	return 0;
   }
 
   is_new_=true;
   for(int j = 0; j < n; j++){
-	if(rigid_[j].cond > 0)
-	{
-      //if (seqId % freq == 0) printf("r(%d) %3.0f %d id=%d:\t", j, rigid[j].cond, rigid[j].flag, rigid[j].id);
-	}
-
-	const int id = rigid_[j].id - 1;
-	if (id < 0 || id > n_uid_)
-	{
+	if(rigid_[j].cond > 0) {
+     // printf("r(%d) %3.0f %d id=%d:\n", j, rigid_[j].cond, rigid_[j].flag, rigid_[j].id);
+    //printf("pose: %3.2f %3.2f %3.2f \n", rigid_[j].pose[0], rigid_[j].pose[1], rigid_[j].pose[2]);
+  	  const int id = rigid_[j].id - 1;
+	  if (id < 0 || id > n_uid_)
+	  {
 		printf("id error %d\n", id);
 		return -1;
+	  }
+
+	  //build pose here
+	  updateMarker(j, rigid_[j].pose);
 	}
-
-	//build pose here
-	updateMarker(j, rigid_[j].pose);
+	else
+	  is_new_=false;
   }
-
   poses=poses_;
-  return 1;
+  if (is_new_) return 1;
+  return 0;
 }
 
 
