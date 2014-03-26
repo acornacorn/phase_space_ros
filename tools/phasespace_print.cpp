@@ -118,7 +118,7 @@ int main( int argc, char** argv )
 			poses[0].getRotation().z());
 
 	}
-    usleep(10000);
+    usleep(1000);
   }
 
 	return 0;

@@ -57,8 +57,8 @@ struct marker{
 };
 
 struct rigid_body {
-	int id;
-	std::vector<phasespace::marker> markers;
+  int id;
+  std::vector<phasespace::marker> markers;
 };
 
 class phaseSpaceDriver {
@@ -94,11 +94,9 @@ private:
   const std::string hostname_;
   bool is_new_;
   //markers are not used but still need to be read anyway
-  OWLMarker markers_[phasespace::MAX_MARKER];
   std::vector<rigid_body> rb_markers_;
   int n_markers_;
   //the uids. 0=left
-  OWLRigid rigid_[phasespace::MAX_MARKER];
 
 };
 

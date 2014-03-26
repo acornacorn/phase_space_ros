@@ -41,8 +41,6 @@ namespace phaseSpace{
 #include "phasespace/msg.h"
 }
 
-#define SLAVE_CLIENT_MODE
-
 phasespace::phaseSpaceDriver::phaseSpaceDriver(
                               const std::string hostname,
                               const std::vector<std::string> rigid_body_names)
@@ -77,7 +75,7 @@ int phasespace::phaseSpaceDriver::read_rigid_body_file(const char *rbfile, const
   }
 
   for(m = 0; m < phasespace::MAX_MARKER; m++) {
-	phasespace::marker rb_marker;
+    phasespace::marker rb_marker;
 
     if (fscanf(fp, "%d%c %f %f %f",
 	       &rb_marker.id, &whitespace,
@@ -98,21 +96,25 @@ int phasespace::phaseSpaceDriver::read_rigid_body_file(const char *rbfile, const
 
 int phasespace::phaseSpaceDriver::init()
 {
-  int flags = 0;
+  size_t flags = 0;
 
   if(owlInit(hostname_.c_str(), flags) < 0)
     return -1;
   owlSetInteger(OWL_FRAME_BUFFER_SIZE, 0);
 
-  for (int tracker=0; tracker++; tracker++) {
+  for (int tracker=0; tracker<rb_markers_.size(); tracker++) {
     // create tracker
-    owlTrackeri(tracker, OWL_CREATE, OWL_POINT_TRACKER);
+    owlTrackeri(tracker, OWL_CREATE, OWL_RIGID_TRACKER);
 
     // set markers
     for(int i = 0; i < rb_markers_[tracker].markers.size(); i++) {
       owlMarkeri(MARKER(tracker, i), OWL_SET_LED, rb_markers_[tracker].markers[i].id);
+      //ROS_INFO("id : %d ", rb_markers_[tracker].markers[i].id);
       // set marker positions
       owlMarkerfv(MARKER(tracker, i), OWL_SET_POSITION, rb_markers_[tracker].markers[i].pos);
+      //ROS_INFO("pose : %f %f %f \n", rb_markers_[tracker].markers[i].pos[0], 
+       //                    rb_markers_[tracker].markers[i].pos[1], 
+       //                    rb_markers_[tracker].markers[i].pos[2]);
     }
 
     // activate tracker
@@ -148,13 +150,16 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
   int rc = 0;
   int err;
 
+  OWLRigid rigid[n_uid_];
+  OWLMarker markers[MAX_MARKER];
+
   // get the rigid body
-  int n = owlGetRigids(rigid_, n_uid_);
+  int n = owlGetRigids(rigid, n_uid_);
 
   // get the rigid body markers
   //  note: markers have to be read,
   //  even if they are not used
-  int m = owlGetMarkers(markers_, MAX_MARKER);
+  int m = owlGetMarkers(markers, MAX_MARKER);
 
   // check for error
   if((err = owlGetError()) != OWL_NO_ERROR)
@@ -163,28 +168,21 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
 	return -1;
   }
 
+  is_new_=false;
   // no data yet
   if(n == 0)
   {
-	is_new_=false;
-	return 0;
+    return 0;
   }
-
-  is_new_=true;
+  
   for(int j = 0; j < n; j++){
-	if(rigid_[j].cond <= 0)
-	  continue;
+    if(rigid[j].cond <= 0) 
+      return 0;       
 
-	const int id = rigid_[j].id - 1;
-	if (id < 0 || id > n_uid_)
-	{
-	  ROS_INFO("id error %d\n", id);
-	  return -1;
-	}
-
-	//build pose here
-	updateMarker(j, rigid_[j].pose);
+      //build pose here
+      updateMarker(j, rigid[j].pose);
   }
+  //ROS_INFO("%d rigid body (%d markers):\n", n, m);
   poses=poses_;
 
   return 1;
