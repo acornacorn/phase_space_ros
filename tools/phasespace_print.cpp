@@ -102,9 +102,11 @@ int main( int argc, char** argv )
   ROS_INFO("phasespace inited");
 
   std::vector<tf::Pose> poses;
+  poses.resize(1);
 
   while (!kbhit()) {
-	phasespace.read_phasespace(poses);
+	if (phasespace.read_phasespace(poses)) {
+
 	ROS_INFO("pose0 x: %4.1f  y: %4.1f  z: %4.1f ",
 			poses[0].getOrigin().getX(),
 			poses[0].getOrigin().getY(),
@@ -114,7 +116,9 @@ int main( int argc, char** argv )
 			poses[0].getRotation().x(),
 			poses[0].getRotation().y(),
 			poses[0].getRotation().z());
-    usleep(100000);
+
+	}
+    usleep(10000);
   }
 
 	return 0;

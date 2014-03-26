@@ -149,7 +149,7 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
   int err;
 
   // get the rigid body
-  int n = owlGetRigids(rigid_, MAX_MARKER);
+  int n = owlGetRigids(rigid_, n_uid_);
 
   // get the rigid body markers
   //  note: markers have to be read,
@@ -178,15 +178,15 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
 	const int id = rigid_[j].id - 1;
 	if (id < 0 || id > n_uid_)
 	{
-		ROS_INFO("id error %d\n", id);
-		return -1;
+	  ROS_INFO("id error %d\n", id);
+	  return -1;
 	}
 
 	//build pose here
 	updateMarker(j, rigid_[j].pose);
   }
-
   poses=poses_;
+
   return 1;
 }
 
