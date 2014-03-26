@@ -104,9 +104,9 @@ int main(int argc, char **argv)
 	broadcaster = new tf::TransformBroadcaster();
 
   // mangle the reported pose into the ROS frame conventions
-  const tf::Matrix3x3 ros_to_phasespace( -1,  0,  0,
-							  0,  1,  0,
-							  0,  0, -1 );
+  const tf::Matrix3x3 ros_to_phasespace( 0,  1,  0,
+							  -1,  0,  0,
+							  0,  0, 1 );
 
 
 
