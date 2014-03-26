@@ -147,7 +147,7 @@ void phasespace::phaseSpaceDriver::updateMarker(const int index, const float* po
 
 int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
 {
-  int rc = 0;
+  int return_bit=0;
   int err;
 
   OWLRigid rigid[n_uid_];
@@ -176,16 +176,17 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
   }
   
   for(int j = 0; j < n; j++){
-    if(rigid[j].cond <= 0) 
-      return 0;       
+    if(rigid[j].cond > 0) {
+      return_bit|=(1<<j);
 
       //build pose here
       updateMarker(j, rigid[j].pose);
+    }
   }
   //ROS_INFO("%d rigid body (%d markers):\n", n, m);
   poses=poses_;
 
-  return 1;
+  return return_bit;
 }
 
 

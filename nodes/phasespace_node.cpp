@@ -109,34 +109,38 @@ int main(int argc, char **argv)
 							  0,  0, 1 );
 
 
+  phasespace::PhaseSpaceMsg msg;
 
   while (n.ok())
   {
 	std::vector<tf::Pose> poses;
 
 	//publish data
-    phasespace::PhaseSpaceMsg msg;
     msg.header.stamp = ros::Time::now();
 
 	//publish raw data
     phasespace::PhaseSpaceMsg msg_raw;
 	msg_raw.header.stamp = ros::Time::now();
 
-    if (phasespace.read_phasespace(poses)) {
+	int return_bit=phasespace.read_phasespace(poses);
+
+    if (return_bit>0) {
 	  std::vector<geometry_msgs::TransformStamped> transforms(poses.size());
 
 	  for( int i = 0; i <transforms.size()  ; ++i )
 	  {
-	    tf::transformTFToMsg(poses[i], transforms[i].transform);
-	    msg_raw.transform[i]=transforms[i].transform;
+		if (return_bit&(1<<i)) {
+	      tf::transformTFToMsg(poses[i], transforms[i].transform);
+	      msg_raw.transform[i]=transforms[i].transform;
 
-	    tf::Pose pose_calibrated;
-	    pose_calibrated.setBasis(ros_to_phasespace*poses[i].getBasis());
-	    pose_calibrated.setOrigin(ros_to_phasespace*pose_calibrated.getOrigin());
-	    pose_calibrated*=phasespace_attach;
-	    tf::transformTFToMsg(pose_calibrated, transforms[i].transform);
+	      tf::Pose pose_calibrated;
+	      pose_calibrated.setBasis(ros_to_phasespace*poses[i].getBasis());
+	      pose_calibrated.setOrigin(ros_to_phasespace*pose_calibrated.getOrigin());
+	      pose_calibrated*=phasespace_attach;
+	      tf::transformTFToMsg(pose_calibrated, transforms[i].transform);
 
-        msg.transform[i]=transforms[i].transform;
+          msg.transform[i]=transforms[i].transform;
+		}
       }
 	  phasespace_pub.publish(msg);
 	  phasespace_raw_pub.publish(msg_raw);
