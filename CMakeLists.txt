@@ -70,15 +70,6 @@ target_link_libraries(phasespace_node
   ${catkin_LIBRARIES}
 )
 
-add_executable(phasespace_jim 
-  tools/track2.cc)
-add_dependencies(phasespace_jim
-  phasespace)
-target_link_libraries(phasespace_jim
-  phasespace
-  ${catkin_LIBRARIES}
-)
-
 install(TARGETS phasespace_print
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
