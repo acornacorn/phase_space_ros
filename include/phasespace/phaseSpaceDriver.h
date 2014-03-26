@@ -48,9 +48,23 @@
 
 namespace phasespace {
 
+static const int MAX_MARKER=32;
+static const int MAX_UID=4;
+
+struct marker{
+  int id;
+  float pos[3];
+};
+
+struct rigid_body {
+	int id;
+	std::vector<phasespace::marker> markers;
+};
+
 class phaseSpaceDriver {
 public:
-  phaseSpaceDriver(const std::string hostname, const int n_uid);
+  phaseSpaceDriver(const std::string hostname,
+                   const std::vector<std::string> rigid_body_names);
   ~phaseSpaceDriver();
 
   int init();
@@ -58,7 +72,7 @@ public:
   //read the uid input.
   int read_phasespace(std::vector<tf::Pose>&);
 
-  static const int MAX_MARKER=32;
+
 
 private:
   //do not copy
@@ -67,17 +81,24 @@ private:
   //read from the hardware
   void updateMarker(const int index, const float* pose);
   
+  //read rigid body from the file
+  int read_rigid_body_file(const char *rbfile, const int id);
+
 
 
   const int n_uid_;
 
   std::vector<tf::Pose> poses_;
+  std::vector<std::string> filenames_;
+
   const std::string hostname_;
   bool is_new_;
   //markers are not used but still need to be read anyway
-  OWLMarker markers_[MAX_MARKER];
+  OWLMarker markers_[phasespace::MAX_MARKER];
+  std::vector<rigid_body> rb_markers_;
+  int n_markers_;
   //the uids. 0=left
-  OWLRigid rigid_[MAX_MARKER];
+  OWLRigid rigid_[phasespace::MAX_MARKER];
 
 };
 

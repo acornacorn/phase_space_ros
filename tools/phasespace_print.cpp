@@ -31,6 +31,8 @@
  * Edited by: Sean Seungkook Yun <seungkook.yun@sri.com> 
 */
 
+#include <string>
+#include <sstream>
 #include <cstdio>
 #include <stdio.h>
 #include <termios.h>
@@ -41,6 +43,7 @@
 #include <unistd.h>
 #include "tf/tf.h"
 #include "phasespace/phaseSpaceDriver.h"
+#include "src_folder.h"
 
 using namespace phasespace;
 
@@ -78,7 +81,20 @@ int kbhit ( void ) {
 int main( int argc, char** argv )
 {
   ROS_INFO("starting phasespace print");
-  phaseSpaceDriver phasespace("phasespace-pc",2);
+  std::vector<std::string> file_names;
+
+  ROS_INFO("Absolute Path: %s", SRC_FOLDER);
+
+  std::stringstream ss;
+  ss<<SRC_FOLDER<<"/penA-14.rb";
+  file_names.push_back(ss.str());
+
+  std::stringstream ss2;
+  ss2<<SRC_FOLDER<<"/penB-12.rb";
+  file_names.push_back(ss2.str());
+
+
+  phaseSpaceDriver phasespace("phasespace-pc", file_names);
   if (phasespace.init()<0) {
 	  ROS_ERROR("PhaseSpace init failed. check the device?");
 	  return -1;

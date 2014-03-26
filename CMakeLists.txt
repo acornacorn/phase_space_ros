@@ -29,7 +29,8 @@ catkin_package(
     CATKIN_DEPENDS geometry_msgs tf
 )
 include_directories(include 
-                    ${catkin_INCLUDE_DIRS} 
+ ${catkin_INCLUDE_DIRS}
+ ${CMAKE_CURRENT_BINARY_DIR}/include 
                     )
 
 link_directories(${catkin_LIBRARY_DIRS})
@@ -46,6 +47,9 @@ target_link_libraries(phasespace
   owlsock
   ${catkin_LIBRARIES}
 )
+
+get_filename_component(PHASESPACE_SRC_FOLDER "model/" ABSOLUTE)
+configure_file(include/src_folder.h.in include/src_folder.h)
 
 add_executable(phasespace_print 
   tools/phasespace_print.cpp)

@@ -59,7 +59,11 @@ int main(int argc, char **argv)
 	return -1;
   }
 
-  phaseSpaceDriver phasespace(phasespace_hostname, num_sen);
+  std::vector<std::string> file_names;
+  file_names.push_back("pen-1");
+  file_names.push_back("pen-2");
+
+  phaseSpaceDriver phasespace(phasespace_hostname, file_names);
   if (phasespace.init()<0) {
 	  ROS_ERROR("PhaseSpace init failed. check the device?");
 	  return -1;

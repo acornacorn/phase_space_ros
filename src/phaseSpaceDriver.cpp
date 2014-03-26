@@ -33,8 +33,9 @@
 *********************************************************************/
 
 /** \Author: Sean Seungkook Yun */
-
+#include <stdio.h>
 #include "phasespace/phaseSpaceDriver.h"
+#include "ros/assert.h"
 
 namespace phaseSpace{
 #include "phasespace/msg.h"
@@ -44,13 +45,17 @@ namespace phaseSpace{
 
 phasespace::phaseSpaceDriver::phaseSpaceDriver(
                               const std::string hostname,
-                              const int n_uid)
-  : hostname_(hostname), is_new_(false), n_uid_(n_uid)
+                              const std::vector<std::string> rigid_body_names)
+  : hostname_(hostname), is_new_(false), n_uid_(rigid_body_names.size())
 {
   // there's no default constructor of tf::Pose
   // with (0,0,0) position and (1,0,0,0) quaternion. it's annoying...
   for (int i=0; i<n_uid_; i++)
 	  poses_.push_back(tf::Pose(tf::Quaternion(0,0,0,1)));
+  rb_markers_.resize(n_uid_);
+
+  for(int i=0; i<n_uid_; i++)
+    read_rigid_body_file(rigid_body_names[i].c_str(), i);
 }
 
 phasespace::phaseSpaceDriver::~phaseSpaceDriver()
@@ -59,35 +64,66 @@ phasespace::phaseSpaceDriver::~phaseSpaceDriver()
   owlDone();
 }
 
+int phasespace::phaseSpaceDriver::read_rigid_body_file(const char *rbfile, const int id)
+{
+  FILE *fp;
+  char whitespace;
+  int m;
+
+  fp = fopen(rbfile, "r");
+  if (!fp) {
+    perror(rbfile);
+    return -1;
+  }
+
+  for(m = 0; m < phasespace::MAX_MARKER; m++) {
+	phasespace::marker rb_marker;
+
+    if (fscanf(fp, "%d%c %f %f %f",
+	       &rb_marker.id, &whitespace,
+	       &rb_marker.pos[0],
+	       &rb_marker.pos[1],
+	       &rb_marker.pos[2]) != 5) {
+      break;
+    }
+
+    rb_markers_[id].markers.push_back(rb_marker);
+  }
+  fclose(fp);
+
+  ROS_INFO("%s: %d markers loaded\n", rbfile, m);
+
+  return 0;
+}
+
 int phasespace::phaseSpaceDriver::init()
 {
   int flags = 0;
 
-#ifdef SLAVE_CLIENT_MODE
-  flags |= OWL_SLAVE;
-#endif
   if(owlInit(hostname_.c_str(), flags) < 0)
     return -1;
   owlSetInteger(OWL_FRAME_BUFFER_SIZE, 0);
 
-#ifndef SLAVE_CLIENT_MODE
-  // create tracker 0
-  tracker = 0;
-  owlTrackeri(tracker, OWL_CREATE, OWL_POINT_TRACKER);
+  for (int tracker=0; tracker++; tracker++) {
+    // create tracker
+    owlTrackeri(tracker, OWL_CREATE, OWL_POINT_TRACKER);
 
-  // set markers
-  for(int i = 0; i < n_uid_; i++)
-    owlMarkeri(MARKER(tracker, i), OWL_SET_LED, i);
+    // set markers
+    for(int i = 0; i < rb_markers_[tracker].markers.size(); i++) {
+      owlMarkeri(MARKER(tracker, i), OWL_SET_LED, rb_markers_[tracker].markers[i].id);
+      // set marker positions
+      owlMarkerfv(MARKER(tracker, i), OWL_SET_POSITION, rb_markers_[tracker].markers[i].pos);
+    }
 
-  // activate tracker
-  owlTracker(tracker, OWL_ENABLE);
-  // flush requests and check for errors
-  if(!owlGetStatus())
-  {
+    // activate tracker
+    owlTracker(tracker, OWL_ENABLE);
+    // flush requests and check for errors
+    if(!owlGetStatus())
+    {
       owl_print_error("error in point tracker setup", owlGetError());
       return -1;
+    }
   }
-#endif
 
   // set default frequency
   owlSetFloat(OWL_FREQUENCY, OWL_MAX_FREQUENCY);
@@ -136,15 +172,13 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
 
   is_new_=true;
   for(int j = 0; j < n; j++){
-	if(rigid_[j].cond > 0)
-	{
-      //if (seqId % freq == 0) printf("r(%d) %3.0f %d id=%d:\t", j, rigid[j].cond, rigid[j].flag, rigid[j].id);
-	}
+	if(rigid_[j].cond <= 0)
+	  continue;
 
 	const int id = rigid_[j].id - 1;
 	if (id < 0 || id > n_uid_)
 	{
-		printf("id error %d\n", id);
+		ROS_INFO("id error %d\n", id);
 		return -1;
 	}
 
