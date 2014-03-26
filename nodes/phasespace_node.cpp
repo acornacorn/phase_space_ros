@@ -32,12 +32,14 @@
 */
 
 #include <string>
+#include <sstream>
 #include <ros/ros.h>
 #include "tf/tf.h"
 #include "phasespace/PhaseSpaceMsg.h"
 #include "phasespace/phaseSpaceDriver.h"
 // Visualization
 #include <tf/transform_broadcaster.h>
+#include "src_folder.h"
 
 using namespace phasespace;
 using std::string;
@@ -60,8 +62,16 @@ int main(int argc, char **argv)
   }
 
   std::vector<std::string> file_names;
-  file_names.push_back("pen-1");
-  file_names.push_back("pen-2");
+
+  ROS_INFO("Absolute Path: %s", SRC_FOLDER);
+
+  std::stringstream ss;
+  ss<<SRC_FOLDER<<"/penA-14.rb";
+  file_names.push_back(ss.str());
+
+  std::stringstream ss2;
+  ss2<<SRC_FOLDER<<"/penB-12.rb";
+  file_names.push_back(ss2.str());
 
   phaseSpaceDriver phasespace(phasespace_hostname, file_names);
   if (phasespace.init()<0) {
@@ -112,38 +122,37 @@ int main(int argc, char **argv)
     phasespace::PhaseSpaceMsg msg_raw;
 	msg_raw.header.stamp = ros::Time::now();
 
-    phasespace.read_phasespace(poses);
+    if (phasespace.read_phasespace(poses)) {
+	  std::vector<geometry_msgs::TransformStamped> transforms(poses.size());
 
-    std::vector<geometry_msgs::TransformStamped> transforms(poses.size());
+	  for( int i = 0; i <transforms.size()  ; ++i )
+	  {
+	    tf::transformTFToMsg(poses[i], transforms[i].transform);
+	    msg_raw.transform[i]=transforms[i].transform;
 
-    for( int i = 0; i <transforms.size()  ; ++i )
-	{
-      tf::transformTFToMsg(poses[i], transforms[i].transform);
-      msg_raw.transform[i]=transforms[i].transform;
+	    tf::Pose pose_calibrated;
+	    pose_calibrated.setBasis(ros_to_phasespace*poses[i].getBasis());
+	    pose_calibrated.setOrigin(ros_to_phasespace*pose_calibrated.getOrigin());
+	    pose_calibrated*=phasespace_attach;
+	    tf::transformTFToMsg(pose_calibrated, transforms[i].transform);
 
-      tf::Pose pose_calibrated;
-      pose_calibrated.setBasis(ros_to_phasespace*poses[i].getBasis());
-      pose_calibrated.setOrigin(ros_to_phasespace*pose_calibrated.getOrigin());
-      pose_calibrated*=phasespace_attach;
-      tf::transformTFToMsg(pose_calibrated, transforms[i].transform);
-
-		msg.transform[i]=transforms[i].transform;
-	}
-    phasespace_pub.publish(msg);
-    phasespace_raw_pub.publish(msg_raw);
-
-
-	if(broadcaster)
-	{
-	  std::string frames[4] = {"phasespace_left", "phasespace_right", "phasespace_left2", "phasespace_right2"};
-      for(int kk = 0; kk < num_sen; kk++)
-      {
-        transforms[kk].header.stamp = msg.header.stamp;
-        transforms[kk].header.frame_id = "phasespace_base";
-        transforms[kk].child_frame_id = frames[kk];
+        msg.transform[i]=transforms[i].transform;
       }
+	  phasespace_pub.publish(msg);
+	  phasespace_raw_pub.publish(msg_raw);
 
-      broadcaster->sendTransform(transforms);
+	  if(broadcaster)
+	  {
+	    std::string frames[4] = {"phasespace_left", "phasespace_right", "phasespace_left2", "phasespace_right2"};
+	    for(int kk = 0; kk < num_sen; kk++)
+		{
+		  transforms[kk].header.stamp = msg.header.stamp;
+		  transforms[kk].header.frame_id = "phasespace_base";
+		  transforms[kk].child_frame_id = frames[kk];
+	    }
+
+	    broadcaster->sendTransform(transforms);
+	  }
     }
 
 	ros::spinOnce();
