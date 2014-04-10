@@ -117,10 +117,12 @@ int main(int argc, char **argv)
 
 	//publish data
     msg.header.stamp = ros::Time::now();
+    msg.n_tracker = num_sen;
 
 	//publish raw data
     phasespace::PhaseSpaceMsg msg_raw;
 	msg_raw.header.stamp = ros::Time::now();
+
 
 	int return_bit=phasespace.read_phasespace(poses);
 
