@@ -1,11 +1,21 @@
 <launch>
   <arg name="publish_tf" default="false" />
-  <arg name="px" default="0.0" />
-  <arg name="py" default="0.0" />
-  <arg name="pz" default="0.0" />
-  <arg name="rx" default="0.0" />
-  <arg name="ry" default="0.0" />
-  <arg name="rz" default="0.0" />
+  <arg name="px0" default="0.0" />
+  <arg name="py0" default="0.0" />
+  <arg name="pz0" default="0.0" />
+  <arg name="qx0" default="0.005" />
+  <arg name="qy0" default="-0.611" />
+  <arg name="qz0" default="0.527" />
+  <arg name="qw0" default="0.590" />
+  
+  <arg name="px1" default="0.0" />
+  <arg name="py1" default="0.0" />
+  <arg name="pz1" default="0.0" />
+  <arg name="qx1" default="0.028" />
+  <arg name="qy1" default="0.234" />
+  <arg name="qz1" default="-0.852" />
+  <arg name="qw1" default="-0.467" />
+  
   <arg name="use_grab_frame" default="true" />
   <arg name="phasespace_pc" default="phasespace-pc" />
   <arg name="n_sensor" default="2" />
@@ -15,12 +25,20 @@
 
   <node pkg="phasespace" type="phasespace_node" name="phasespace_driver" output="screen" >
     <param name="publish_tf"  value="$(arg publish_tf)" />
-    <param name="pivot_x" value="$(arg px)" />
-    <param name="pivot_y" value="$(arg py)" />
-    <param name="pivot_z" value="$(arg pz)" />
-    <param name="attach_roll" value="$(arg rx)" />
-    <param name="attach_pitch" value="$(arg ry)" />
-    <param name="attach_yaw" value="$(arg rz)" />
+    <param name="pivot_x0" value="$(arg px0)" />
+    <param name="pivot_y0" value="$(arg py0)" />
+    <param name="pivot_z0" value="$(arg pz0)" />
+    <param name="attach_qx0" value="$(arg qx0)" />
+    <param name="attach_qy0" value="$(arg qy0)" />
+    <param name="attach_qz0" value="$(arg qz0)" />
+    <param name="attach_qw0" value="$(arg qw0)" />
+    <param name="pivot_x1" value="$(arg px1)" />
+    <param name="pivot_y1 value="$(arg py1)" />
+    <param name="pivot_z1" value="$(arg pz1)" />
+    <param name="attach_qx1" value="$(arg qx1)" />
+    <param name="attach_qy1" value="$(arg qy1)" />
+    <param name="attach_qz1" value="$(arg qz1)" />
+    <param name="attach_qw1" value="$(arg qw1)" />
     <param name="phasespace_pc" value="$(arg phasespace_pc)" />
     <param name="n_sensor" value="$(arg n_sensor)" />
     <param name="rigid_file0" value="$(arg rigid_file0)" />

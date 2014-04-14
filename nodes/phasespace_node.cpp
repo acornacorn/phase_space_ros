@@ -93,13 +93,22 @@ int main(int argc, char **argv)
 	ROS_INFO("Publishing frame data to TF.");
 
   //orientation of how the sensor tip is attached
-  double rx, ry, rz;
-  n_private.param<double>("attach_roll", rx, 0);
-  n_private.param<double>("attach_pitch", ry, 0);
-  n_private.param<double>("attach_yaw", rz, 0);
-  tf::Matrix3x3 phasespace_attach_ori;
-  phasespace_attach_ori.setEulerYPR(rz, ry, rx);
-  tf::Pose phasespace_attach(phasespace_attach_ori, tf::Vector3(0,0,0));
+  tf::Pose phasespace_attach[num_sen];
+
+  for (int i=0; i<num_sen; i++) {
+	double px, py, pz;
+    n_private.param<double>(string_add_int("attach_px",i), px, 0);
+    n_private.param<double>(string_add_int("attach_py",i), py, 0);
+    n_private.param<double>(string_add_int("attach_pz",i), pz, 0);
+    phasespace_attach[i].setOrigin(tf::Vector3(px, py, pz));
+
+    double qx, qy, qz, qw;
+    n_private.param<double>(string_add_int("attach_qx",i), qx, 0);
+    n_private.param<double>(string_add_int("attach_qy",i), qy, 0);
+    n_private.param<double>(string_add_int("attach_qz",i), qz, 0);
+    n_private.param<double>(string_add_int("attach_qw",i), qw, 1);
+    phasespace_attach[i].setRotation(tf::Quaternion(qx, qy, qz, qw));
+  }
 
   // Initialize ROS stuff
   ros::Publisher phasespace_pub = n.advertise<phasespace::PhaseSpaceMsg>("phasespace_msg", 1);
@@ -118,6 +127,8 @@ int main(int argc, char **argv)
 
   std::vector<tf::Pose> poses;
   poses.resize(num_sen);
+
+  const double PHASESPACE_SCALE=0.001; //mm to meter
 
   while (n.ok())
   {
@@ -143,8 +154,8 @@ int main(int argc, char **argv)
 
 	      tf::Pose pose_calibrated;
 	      pose_calibrated.setBasis(ros_to_phasespace*poses[i].getBasis());
-	      pose_calibrated.setOrigin(ros_to_phasespace*poses[i].getOrigin());
-	      pose_calibrated*=phasespace_attach;
+	      pose_calibrated.setOrigin(PHASESPACE_SCALE*(ros_to_phasespace*poses[i].getOrigin()));
+	      pose_calibrated*=phasespace_attach[i];
 	      tf::transformTFToMsg(pose_calibrated, transforms[i].transform);
 
           msg.transform[i]=transforms[i].transform;
