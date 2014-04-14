@@ -33,7 +33,7 @@
     <param name="attach_qz0" value="$(arg qz0)" />
     <param name="attach_qw0" value="$(arg qw0)" />
     <param name="pivot_x1" value="$(arg px1)" />
-    <param name="pivot_y1 value="$(arg py1)" />
+    <param name="pivot_y1" value="$(arg py1)" />
     <param name="pivot_z1" value="$(arg pz1)" />
     <param name="attach_qx1" value="$(arg qx1)" />
     <param name="attach_qy1" value="$(arg qy1)" />
