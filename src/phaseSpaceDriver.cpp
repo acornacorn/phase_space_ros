@@ -98,8 +98,10 @@ int phasespace::phaseSpaceDriver::init()
 {
   size_t flags = 0;
 
-  if(owlInit(hostname_.c_str(), flags) < 0)
-    return -1;
+  if(owlInit(hostname_.c_str(), flags) < 0) {
+    ROS_ERROR("CANNOT run owlInit");
+	return -1;
+  }
   owlSetInteger(OWL_FRAME_BUFFER_SIZE, 0);
 
   for (int tracker=0; tracker<rb_markers_.size(); tracker++) {
@@ -183,7 +185,6 @@ int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
       updateMarker(j, rigid[j].pose);
     }
   }
-  //ROS_INFO("%d rigid body (%d markers):\n", n, m);
   poses=poses_;
 
   return return_bit;

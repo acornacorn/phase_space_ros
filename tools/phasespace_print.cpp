@@ -86,11 +86,11 @@ int main( int argc, char** argv )
   ROS_INFO("Absolute Path: %s", SRC_FOLDER);
 
   std::stringstream ss;
-  ss<<SRC_FOLDER<<"/penA-14.rb";
+  ss<<SRC_FOLDER<<"/pen4.rb";
   file_names.push_back(ss.str());
 
   std::stringstream ss2;
-  ss2<<SRC_FOLDER<<"/penB-12.rb";
+  ss2<<SRC_FOLDER<<"/pen5.rb";
   file_names.push_back(ss2.str());
 
 
@@ -102,20 +102,23 @@ int main( int argc, char** argv )
   ROS_INFO("phasespace inited");
 
   std::vector<tf::Pose> poses;
-  poses.resize(1);
+  poses.resize(2);
 
   while (!kbhit()) {
 	if (phasespace.read_phasespace(poses)) {
 
-	ROS_INFO("pose0 x: %4.1f  y: %4.1f  z: %4.1f ",
-			poses[0].getOrigin().getX(),
-			poses[0].getOrigin().getY(),
-			poses[0].getOrigin().getZ());
-	ROS_INFO("pose0 w: %3.2f  x: %3.2f  y: %3.2f  z: %3.2f ",
-			poses[0].getRotation().w(),
-			poses[0].getRotation().x(),
-			poses[0].getRotation().y(),
-			poses[0].getRotation().z());
+		for (int i=0; i<2; i++ ) {
+
+		ROS_INFO("pose%d x: %4.1f  y: %4.1f  z: %4.1f ", i,
+				poses[i].getOrigin().getX(),
+				poses[i].getOrigin().getY(),
+				poses[i].getOrigin().getZ());
+		ROS_INFO("pose%d w: %3.2f  x: %3.2f  y: %3.2f  z: %3.2f ", i,
+				poses[i].getRotation().w(),
+				poses[i].getRotation().x(),
+				poses[i].getRotation().y(),
+				poses[i].getRotation().z());
+		}
 
 	}
     usleep(1000);
