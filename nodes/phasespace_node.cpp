@@ -44,6 +44,12 @@
 using namespace phasespace;
 using std::string;
 
+static std::string string_add_int(const std::string s, const int n) {
+  std::stringstream ss;
+  ss<<s<<n;
+  return ss.str();
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "phasespace_driver");
@@ -62,16 +68,15 @@ int main(int argc, char **argv)
   }
 
   std::vector<std::string> file_names;
-
   ROS_INFO("Absolute Path: %s", SRC_FOLDER);
 
-  std::stringstream ss;
-  ss<<SRC_FOLDER<<"/penA-14.rb";
-  file_names.push_back(ss.str());
-
-  std::stringstream ss2;
-  ss2<<SRC_FOLDER<<"/penB-12.rb";
-  file_names.push_back(ss2.str());
+  for (int i=0; i<num_sen; i++) {
+	std::string raw_file;
+    n_private.param<std::string>(string_add_int("rigid_file",i), raw_file, string_add_int("rigid_file",i));
+    std::stringstream ss;
+    ss<<SRC_FOLDER<<"/" << raw_file;
+    file_names.push_back(ss.str());
+  }
 
   phaseSpaceDriver phasespace(phasespace_hostname, file_names);
   if (phasespace.init()<0) {
@@ -104,17 +109,18 @@ int main(int argc, char **argv)
 	broadcaster = new tf::TransformBroadcaster();
 
   // mangle the reported pose into the ROS frame conventions
-  const tf::Matrix3x3 ros_to_phasespace( 0,  1,  0,
-							  -1,  0,  0,
+  const tf::Matrix3x3 ros_to_phasespace( 1,  0,  0,
+							  0,  1,  0,
 							  0,  0, 1 );
 
 
   phasespace::PhaseSpaceMsg msg;
 
+  std::vector<tf::Pose> poses;
+  poses.resize(num_sen);
+
   while (n.ok())
   {
-	std::vector<tf::Pose> poses;
-
 	//publish data
     msg.header.stamp = ros::Time::now();
     msg.n_tracker = num_sen;
@@ -131,21 +137,21 @@ int main(int argc, char **argv)
 
 	  for( int i = 0; i <transforms.size()  ; ++i )
 	  {
-		if (return_bit&(1<<i)) {
+		//if (return_bit&(1<<i)) {
 	      tf::transformTFToMsg(poses[i], transforms[i].transform);
 	      msg_raw.transform[i]=transforms[i].transform;
 
 	      tf::Pose pose_calibrated;
 	      pose_calibrated.setBasis(ros_to_phasespace*poses[i].getBasis());
-	      pose_calibrated.setOrigin(ros_to_phasespace*pose_calibrated.getOrigin());
+	      pose_calibrated.setOrigin(ros_to_phasespace*poses[i].getOrigin());
 	      pose_calibrated*=phasespace_attach;
 	      tf::transformTFToMsg(pose_calibrated, transforms[i].transform);
 
           msg.transform[i]=transforms[i].transform;
-		}
+		//}
       }
 	  phasespace_pub.publish(msg);
-	  phasespace_raw_pub.publish(msg_raw);
+	  //phasespace_raw_pub.publish(msg_raw);
 
 	  if(broadcaster)
 	  {

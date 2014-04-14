@@ -9,6 +9,8 @@
   <arg name="use_grab_frame" default="true" />
   <arg name="phasespace_pc" default="phasespace-pc" />
   <arg name="n_sensor" default="2" />
+  <arg name="rigid_file0" default="pen4.rb"/>
+  <arg name="rigid_file1" default="pen5.rb"/>
   
 
   <node pkg="phasespace" type="phasespace_node" name="phasespace_driver" output="screen" >
@@ -21,6 +23,8 @@
     <param name="attach_yaw" value="$(arg rz)" />
     <param name="phasespace_pc" value="$(arg phasespace_pc)" />
     <param name="n_sensor" value="$(arg n_sensor)" />
+    <param name="rigid_file0" value="$(arg rigid_file0)" />
+    <param name="rigid_file1" value="$(arg rigid_file1)" />
   </node>
 
 </launch>
