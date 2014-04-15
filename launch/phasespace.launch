@@ -1,20 +1,20 @@
 <launch>
-  <arg name="publish_tf" default="false" />
-  <arg name="px0" default="0.0" />
+  <arg name="publish_tf" default="true" />
+  <arg name="px0" default="-0.05" />
   <arg name="py0" default="0.0" />
   <arg name="pz0" default="0.0" />
-  <arg name="qx0" default="0.005" />
-  <arg name="qy0" default="-0.611" />
-  <arg name="qz0" default="0.527" />
-  <arg name="qw0" default="0.590" />
+  <arg name="qx0" default="-0.611" />
+  <arg name="qy0" default="0.527" />
+  <arg name="qz0" default="-0.590" />
+  <arg name="qw0" default="-0.005" />
   
-  <arg name="px1" default="0.0" />
+  <arg name="px1" default="-0.05" />
   <arg name="py1" default="0.0" />
   <arg name="pz1" default="0.0" />
-  <arg name="qx1" default="0.028" />
-  <arg name="qy1" default="0.234" />
-  <arg name="qz1" default="-0.852" />
-  <arg name="qw1" default="-0.467" />
+  <arg name="qx1" default="0.234" />
+  <arg name="qy1" default="-0.852" />
+  <arg name="qz1" default="0.467" />
+  <arg name="qw1" default="-0.028" />
   
   <arg name="use_grab_frame" default="true" />
   <arg name="phasespace_pc" default="phasespace-pc" />

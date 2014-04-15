@@ -96,18 +96,22 @@ int main(int argc, char **argv)
   tf::Pose phasespace_attach[num_sen];
 
   for (int i=0; i<num_sen; i++) {
-	double px, py, pz;
-    n_private.param<double>(string_add_int("attach_px",i), px, 0);
-    n_private.param<double>(string_add_int("attach_py",i), py, 0);
-    n_private.param<double>(string_add_int("attach_pz",i), pz, 0);
-    phasespace_attach[i].setOrigin(tf::Vector3(px, py, pz));
-
     double qx, qy, qz, qw;
     n_private.param<double>(string_add_int("attach_qx",i), qx, 0);
     n_private.param<double>(string_add_int("attach_qy",i), qy, 0);
     n_private.param<double>(string_add_int("attach_qz",i), qz, 0);
     n_private.param<double>(string_add_int("attach_qw",i), qw, 1);
-    phasespace_attach[i].setRotation(tf::Quaternion(qx, qy, qz, qw));
+    tf::Quaternion q_attach(qx, qy, qz, qw);
+    phasespace_attach[i].setRotation(q_attach);
+
+	double px, py, pz;
+    n_private.param<double>(string_add_int("attach_px",i), px, 0);
+    n_private.param<double>(string_add_int("attach_py",i), py, 0);
+    n_private.param<double>(string_add_int("attach_pz",i), pz, 0);
+    tf::Vector3 v_attach(px, py, pz);
+    v_attach= tf::quatRotate(q_attach.inverse(), v_attach);
+    phasespace_attach[i].setOrigin(v_attach);
+
   }
 
   // Initialize ROS stuff

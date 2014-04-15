@@ -144,7 +144,7 @@ void phasespace::phaseSpaceDriver::updateMarker(const int index, const float* po
 	  return;
 
   poses_[index].setOrigin(tf::Vector3(pose[0], pose[1], pose[2]));
-  poses_[index].setRotation(tf::Quaternion(pose[3],pose[4],pose[5],pose[6]));
+  poses_[index].setRotation(tf::Quaternion(pose[4],pose[5],pose[6],pose[3]));
 }
 
 int phasespace::phaseSpaceDriver::read_phasespace(std::vector<tf::Pose>& poses)
