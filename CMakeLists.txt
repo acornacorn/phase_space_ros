@@ -31,18 +31,20 @@ catkin_package(
 include_directories(include 
  ${catkin_INCLUDE_DIRS}
  ${CMAKE_CURRENT_BINARY_DIR}/include 
-                    )
+)
 
 link_directories(${catkin_LIBRARY_DIRS}
   bin  
 )
 
+add_library(owlsock SHARED IMPORTED)
+set_target_properties(owlsock PROPERTIES
+  IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/bin/libowlsock.so)
 
 add_library(phasespace 
   src/phaseSpaceDriver.cpp
   src/udpServer.cpp)
 add_dependencies(phasespace 
-  owlsock
   phasespace_gencpp)
 
 target_link_libraries(phasespace
