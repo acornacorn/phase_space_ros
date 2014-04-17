@@ -1,4 +1,4 @@
-trakstar_ros
-============
+phase_space_ros
+===============
 
-ros driver for trakstar magnetic tracker
+ROS driver for phase_space optical tracker.
